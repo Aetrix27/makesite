@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -17,7 +18,14 @@ type Page struct {
 }
 
 func main() {
-	fileContents, err := ioutil.ReadFile("first-post.txt")
+	filename := flag.String("", "first-post", "Name of the inputted text file.")
+	flag.Parse()
+
+	save(*filename)
+}
+
+func save(filename string) {
+	fileContents, err := ioutil.ReadFile(filename + ".txt")
 	if err != nil {
 		// A common use of `panic` is to abort if a function returns an error
 		// value that we don’t know how to (or want to) handle. This example
@@ -27,9 +35,9 @@ func main() {
 	fmt.Print(string(fileContents))
 
 	page := Page{
-		TextFilePath: "./first-post",
-		TextFileName: "first-post",
-		HTMLPagePath: "first-post.html",
+		TextFilePath: "./" + filename,
+		TextFileName: filename,
+		HTMLPagePath: filename + ".html",
 		Content:      string(fileContents),
 	}
 
