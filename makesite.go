@@ -8,6 +8,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	md "github.com/JohannesKaufmann/html-to-markdown"
 )
 
 // Page holds all the information we need to generate a new
@@ -31,7 +33,7 @@ func main() {
 		current_file := file.Name()
 		//fmt.Println(current_file)
 		if strings.Contains(current_file, ".txt") {
-			fmt.Println(current_file)
+			//fmt.Println(current_file)
 			filenames := flag.String(current_file, current_file, "")
 			flag.Parse()
 			save(*filenames)
@@ -45,14 +47,14 @@ func main() {
 func save(filename string) {
 	fileContents, err := ioutil.ReadFile(filename)
 	trimmed := strings.TrimSuffix(filename, ".txt")
-	fmt.Println(trimmed)
+	//fmt.Println(trimmed)
 	if err != nil {
 		// A common use of `panic` is to abort if a function returns an error
 		// value that we don’t know how to (or want to) handle. This example
 		// panics if we get an unexpected error when creating a new file.
 		panic(err)
 	}
-	fmt.Print(string(fileContents))
+	//fmt.Print(string(fileContents))
 
 	page := Page{
 		TextFilePath: "./" + trimmed,
@@ -77,4 +79,21 @@ func save(filename string) {
 	// Furthermore, upon execution, the rendered template will be
 	// saved inside the new file we created earlier.
 	t.Execute(newFile, page)
+
+	converter := md.NewConverter("", true, nil)
+
+	file, _ := ioutil.ReadFile(trimmed + ".html")
+	stringFile := string(file)
+
+	markdown, err := converter.ConvertString(stringFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("md ->", markdown)
+
+	bytesToWrite := []byte(markdown)
+	creation_err := ioutil.WriteFile(trimmed+".md", bytesToWrite, 0644)
+	if err != nil {
+		panic(creation_err)
+	}
 }
